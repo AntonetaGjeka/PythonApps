@@ -88,12 +88,3 @@ class PictureCompressor:
 root = tk.Tk()  # Creates the main window
 app = PictureCompressor(root)  # Creates an instance of the PictureCompressor class
 root.mainloop()  # Starts the Tkinter event loop to keep the window open
-
-
-#Kommentare fuer mogliche Verbesserungen: (von Michaela vorgeschlagen)
-#Man kann einzelne Fotos auswahlen, nicht nur ganze Folders
-#Verbesserung der GUI, ein bisschen nutzerfreundlicher machen!!
-
-#Does Reverse Engineering work on this, d.h from exe file to python file umwandeln...
-#Die Executable file auf einem Linux Geraet oder MAC os funktioniert
-#Idee von Jens: Kompression fuer andere Dateien auch, nicht nur BIlder
