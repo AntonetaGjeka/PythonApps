@@ -6,7 +6,7 @@ class ExcelComparatorApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Excel File Comparator")
-        self.root.geometry("700x500")
+        self.root.geometry("600x300")
 
         # File paths
         self.file1 = None
@@ -49,14 +49,7 @@ class ExcelComparatorApp:
         self.dropdown_file2.grid(row=1, column=1, padx=5, pady=5)
 
         # Compare button
-        ttk.Button(root, text="Compare Files", command=self.compare_files).pack(pady=10)
-
-        # Output frame
-        output_frame = ttk.LabelFrame(root, text="Output", padding=10)
-        output_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-        self.output_box = tk.Text(output_frame, height=10, wrap="word", font=("Arial", 10))
-        self.output_box.pack(fill="both", expand=True)
+        ttk.Button(root, text="Compare and Save", command=self.compare_files).pack(pady=5)
 
     def load_file1(self):
         self.file1 = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx *.xls")])
@@ -90,38 +83,22 @@ class ExcelComparatorApp:
             df1 = pd.read_excel(self.file1)
             df2 = pd.read_excel(self.file2)
 
-            # Extract selected columns and reset index
-            col1_series = df1[column1].dropna().reset_index(drop=True)
-            col2_series = df2[column2].dropna().reset_index(drop=True)
-
             # Find differences
-            only_in_file1 = col1_series[~col1_series.isin(col2_series)]
-            only_in_file2 = col2_series[~col2_series.isin(col1_series)]
+            only_in_file1 = df1[~df1[column1].isin(df2[column2])]
+            only_in_file2 = df2[~df2[column2].isin(df1[column1])]
 
-            # Display differences
-            self.output_box.delete("1.0", tk.END)
-            if only_in_file1.empty and only_in_file2.empty:
-                self.output_box.insert(tk.END, "No differences found.")
-            else:
-                self.output_box.insert(tk.END, "Items only in File 1:\n")
-                self.output_box.insert(tk.END, only_in_file1.to_string(index=False) + "\n\n")
-                self.output_box.insert(tk.END, "Items only in File 2:\n")
-                self.output_box.insert(tk.END, only_in_file2.to_string(index=False))
-
-                # Ask user where to save the results
-                save_path = filedialog.asksaveasfilename(
-                    defaultextension=".xlsx",
-                    filetypes=[("Excel files", "*.xlsx *.xls")],
-                    title="Save Differences"
-                )
-                if save_path:
-                    # Save to Excel
-                    result_df = pd.DataFrame({
-                        "Only in File 1": only_in_file1,
-                        "Only in File 2": only_in_file2
-                    })
-                    result_df.to_excel(save_path, index=False)
-                    messagebox.showinfo("Success", f"Differences saved to {save_path}")
+            # Ask user where to save the results
+            save_path = filedialog.asksaveasfilename(
+                defaultextension=".xlsx",
+                filetypes=[("Excel files", "*.xlsx *.xls")],
+                title="Save Differences"
+            )
+            if save_path:
+                # Save to Excel
+                with pd.ExcelWriter(save_path) as writer:
+                    only_in_file1.to_excel(writer, sheet_name="Only in File 1", index=False)
+                    only_in_file2.to_excel(writer, sheet_name="Only in File 2", index=False)
+                messagebox.showinfo("Success", f"Differences saved to {save_path}")
 
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
